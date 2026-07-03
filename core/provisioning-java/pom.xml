@@ -151,6 +151,10 @@ under the License.
             <syncope.connid.location>file:${bundles.directory}/</syncope.connid.location>
             <TESTCONTAINERS_REUSE_ENABLE>true</TESTCONTAINERS_REUSE_ENABLE>
           </systemPropertyVariables>
+          <excludes>
+            <!-- Esclusione dei test nativi per isolare la SUT come richiesto dalle linee guida -->
+            <exclude>org/apache/syncope/core/provisioning/java/**/*.java</exclude>
+          </excludes>
         </configuration>
       </plugin>
 

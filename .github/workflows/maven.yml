@@ -1,0 +1,23 @@
+name: Syncope CI
+
+on:
+  push:
+    branches: [ "milestone4_latest" ]
+  pull_request:
+    branches: [ "milestone4_latest" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up JDK 21
+      uses: actions/setup-java@v3
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+        cache: maven
+    
+    - name: Build and Test DefaultMappingManager and TemplateUtils
+      run: mvn -B test -pl core/provisioning-java,core/provisioning-api -Dtest=*DefaultMappingManagerTest*,*TemplateUtilsTest* -DfailIfNoTests=false
