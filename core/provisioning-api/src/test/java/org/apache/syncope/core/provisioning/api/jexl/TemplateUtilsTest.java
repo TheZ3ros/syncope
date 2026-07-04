@@ -29,15 +29,15 @@ public class TemplateUtilsTest {
     @Mock
     private GroupDAO groupDAO;
 
-    @Mock
     private JexlTools jexlTools;
 
-    @InjectMocks
     private TemplateUtils templateUtils;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
+        jexlTools = new JexlTools(new org.apache.commons.jexl3.JexlBuilder().create());
+        templateUtils = new TemplateUtils(userDAO, groupDAO, jexlTools);
     }
 
     @Test
@@ -53,8 +53,6 @@ public class TemplateUtilsTest {
         user.setUsername("validJexl");
         templates.put("user", user);
 
-        when(jexlTools.isExpressionValid(anyString())).thenReturn(true);
-
         assertDoesNotThrow(() -> templateUtils.check(templates, ClientExceptionType.InvalidAnyType));
     }
 
@@ -64,8 +62,6 @@ public class TemplateUtilsTest {
         UserTO user = new UserTO();
         user.setUsername("invalidJexl!!");
         templates.put("user", user);
-
-        when(jexlTools.isExpressionValid(anyString())).thenReturn(false);
 
         SyncopeClientException exception = assertThrows(SyncopeClientException.class,
                 () -> templateUtils.check(templates, ClientExceptionType.InvalidAnyType));
@@ -78,8 +74,6 @@ public class TemplateUtilsTest {
         GroupTO group = new GroupTO();
         group.setName("invalidGroup!!");
         templates.put("group", group);
-
-        when(jexlTools.isExpressionValid(anyString())).thenReturn(false);
 
         SyncopeClientException exception = assertThrows(SyncopeClientException.class,
                 () -> templateUtils.check(templates, ClientExceptionType.InvalidAnyType));
@@ -101,8 +95,6 @@ public class TemplateUtilsTest {
         attr.getValues().add("invalidAttrExp!!");
         any.getPlainAttrs().add(attr);
         templates.put("any", any);
-
-        when(jexlTools.isExpressionValid(anyString())).thenReturn(false);
 
         SyncopeClientException exception = assertThrows(SyncopeClientException.class,
                 () -> templateUtils.check(templates, ClientExceptionType.InvalidAnyType));
