@@ -93,6 +93,9 @@ public class DefaultMappingManagerTest {
         ExternalResource resource = mock(ExternalResource.class);
         OrgUnit orgUnit = mock(OrgUnit.class);
         when(resource.getOrgUnit()).thenReturn(orgUnit);
+        Item item = new Item();
+        item.setIntAttrName("name");
+        when(orgUnit.getItems()).thenReturn(java.util.List.of(item));
 
         assertThrows(NullPointerException.class, () -> mappingManager.prepareAttrsFromRealm(null, resource));
     }
