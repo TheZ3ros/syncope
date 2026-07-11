@@ -2,9 +2,9 @@ name: ISW2 CI Pipeline
 
 on:
   push:
-    branches: [ "master", "main" ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ "master", "main" ]
+    branches: [ "**" ]
 
 jobs:
   build-and-test:
