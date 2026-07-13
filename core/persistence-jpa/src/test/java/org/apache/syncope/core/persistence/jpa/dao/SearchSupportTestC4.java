@@ -11,7 +11,7 @@ import org.apache.syncope.core.persistence.jpa.entity.user.JPAUser;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class SearchSupportTest_C4 {
+class SearchSupportTestC4 {
 
     @Test
     @DisplayName("table() should return AnyObject table")
@@ -190,7 +190,7 @@ class SearchSupportTest_C4 {
     }
 
     private static final class SearchSupportStub
-            extends SearchSupport implements SearchViewSupport {
+            extends SearchViewSupport {
 
         SearchSupportStub(final AnyTypeKind anyTypeKind) {
             super(anyTypeKind);

@@ -10,7 +10,7 @@ import org.apache.syncope.core.persistence.jpa.entity.group.JPAGroup;
 import org.apache.syncope.core.persistence.jpa.entity.user.JPAUser;
 import org.junit.jupiter.api.Test;
 
-class SearchSupportTest_C3 {
+class SearchSupportTestC2 {
 
     @Test
     void tableForAnyObject() {
@@ -67,12 +67,12 @@ class SearchSupportTest_C3 {
     }
 
     @Test
-    void relationshipForAnyObject() {
+    void relationshipForUser() {
         SearchSupport.SearchView view =
-                new SearchSupport(AnyTypeKind.ANY_OBJECT).relationship();
+                new SearchSupport(AnyTypeKind.USER).relationship();
 
-        assertEquals("svam", view.alias());
-        assertEquals("anyObject_search_arelationship", view.name());
+        assertEquals("svum", view.alias());
+        assertEquals("user_search_urelationship", view.name());
     }
 
     @Test
@@ -85,30 +85,12 @@ class SearchSupportTest_C3 {
     }
 
     @Test
-    void relationshipForUser() {
+    void relationshipForAnyObject() {
         SearchSupport.SearchView view =
-                new SearchSupport(AnyTypeKind.USER).relationship();
-
-        assertEquals("svum", view.alias());
-        assertEquals("user_search_urelationship", view.name());
-    }
-
-    @Test
-    void membershipForAnyObject() {
-        SearchSupport.SearchView view =
-                new SearchSupport(AnyTypeKind.ANY_OBJECT).membership();
+                new SearchSupport(AnyTypeKind.ANY_OBJECT).relationship();
 
         assertEquals("svam", view.alias());
-        assertEquals("anyObject_search_amembership", view.name());
-    }
-
-    @Test
-    void membershipForGroup() {
-        SearchSupport.SearchView view =
-                new SearchSupport(AnyTypeKind.GROUP).membership();
-
-        assertEquals("svam", view.alias());
-        assertEquals("group_search_amembership", view.name());
+        assertEquals("anyObject_search_arelationship", view.name());
     }
 
     @Test
@@ -121,21 +103,21 @@ class SearchSupportTest_C3 {
     }
 
     @Test
-    void roleForAnyObject() {
+    void membershipForGroup() {
         SearchSupport.SearchView view =
-                new SearchSupport(AnyTypeKind.ANY_OBJECT).role();
+                new SearchSupport(AnyTypeKind.GROUP).membership();
 
-        assertEquals("svr", view.alias());
-        assertEquals("anyObject_search_role", view.name());
+        assertEquals("svam", view.alias());
+        assertEquals("group_search_amembership", view.name());
     }
 
     @Test
-    void roleForGroup() {
+    void membershipForAnyObject() {
         SearchSupport.SearchView view =
-                new SearchSupport(AnyTypeKind.GROUP).role();
+                new SearchSupport(AnyTypeKind.ANY_OBJECT).membership();
 
-        assertEquals("svr", view.alias());
-        assertEquals("group_search_role", view.name());
+        assertEquals("svam", view.alias());
+        assertEquals("anyObject_search_amembership", view.name());
     }
 
     @Test
@@ -148,30 +130,12 @@ class SearchSupportTest_C3 {
     }
 
     @Test
-    void auxClassForAnyObject() {
-        SearchSupport.SearchView view =
-                new SearchSupport(AnyTypeKind.ANY_OBJECT).auxClass();
-
-        assertEquals("svac", view.alias());
-        assertEquals("anyObject_search_auxClass", view.name());
-    }
-
-    @Test
     void auxClassForGroup() {
         SearchSupport.SearchView view =
                 new SearchSupport(AnyTypeKind.GROUP).auxClass();
 
         assertEquals("svac", view.alias());
         assertEquals("group_search_auxClass", view.name());
-    }
-
-    @Test
-    void auxClassForUser() {
-        SearchSupport.SearchView view =
-                new SearchSupport(AnyTypeKind.USER).auxClass();
-
-        assertEquals("svac", view.alias());
-        assertEquals("user_search_auxClass", view.name());
     }
 
     @Test
@@ -184,66 +148,12 @@ class SearchSupportTest_C3 {
     }
 
     @Test
-    void resourceForGroup() {
-        SearchSupport.SearchView view =
-                new SearchSupport(AnyTypeKind.GROUP).resource();
-
-        assertEquals("svr", view.alias());
-        assertEquals("group_search_resource", view.name());
-    }
-
-    @Test
-    void resourceForUser() {
-        SearchSupport.SearchView view =
-                new SearchSupport(AnyTypeKind.USER).resource();
-
-        assertEquals("svr", view.alias());
-        assertEquals("user_search_resource", view.name());
-    }
-
-    @Test
-    void groupResourceForAnyObject() {
-        SearchSupport.SearchView view =
-                new SearchSupport(AnyTypeKind.ANY_OBJECT).groupResource();
-
-        assertEquals("svrr", view.alias());
-        assertEquals("anyObject_search_group_res", view.name());
-    }
-
-    @Test
-    void groupResourceForGroup() {
-        SearchSupport.SearchView view =
-                new SearchSupport(AnyTypeKind.GROUP).groupResource();
-
-        assertEquals("svrr", view.alias());
-        assertEquals("group_search_group_res", view.name());
-    }
-
-    @Test
     void groupResourceForUser() {
         SearchSupport.SearchView view =
                 new SearchSupport(AnyTypeKind.USER).groupResource();
 
         assertEquals("svrr", view.alias());
         assertEquals("user_search_group_res", view.name());
-    }
-
-    @Test
-    void entitlementsForAnyObject() {
-        SearchSupport.SearchView view =
-                new SearchSupport(AnyTypeKind.ANY_OBJECT).entitlements();
-
-        assertEquals("sve", view.alias());
-        assertEquals("anyObject_search_entitlements", view.name());
-    }
-
-    @Test
-    void entitlementsForGroup() {
-        SearchSupport.SearchView view =
-                new SearchSupport(AnyTypeKind.GROUP).entitlements();
-
-        assertEquals("sve", view.alias());
-        assertEquals("group_search_entitlements", view.name());
     }
 
     @Test
@@ -256,7 +166,7 @@ class SearchSupportTest_C3 {
     }
 
     @Test
-    void asSearchViewSupportThrowsWhenNotSearchViewSupport() {
+    void asSearchViewSupportThrowsExceptionWhenNotSearchViewSupport() {
         SearchSupport support = new SearchSupport(AnyTypeKind.USER);
 
         assertThrows(
@@ -266,17 +176,19 @@ class SearchSupportTest_C3 {
 
     @Test
     void asSearchViewSupportReturnsInstance() {
-        class TestSearchViewSupport extends SearchViewSupport {
+        DummySearchViewSupport support =
+                new DummySearchViewSupport(AnyTypeKind.USER);
 
-            TestSearchViewSupport() {
-                super(AnyTypeKind.USER);
-            }
+        assertInstanceOf(
+                SearchViewSupport.class,
+                support.asSearchViewSupport());
+    }
+
+    private static class DummySearchViewSupport
+            extends SearchViewSupport {
+
+        DummySearchViewSupport(final AnyTypeKind anyTypeKind) {
+            super(anyTypeKind);
         }
-
-        TestSearchViewSupport support = new TestSearchViewSupport();
-
-        SearchViewSupport result = support.asSearchViewSupport();
-
-        assertInstanceOf(TestSearchViewSupport.class, result);
     }
 }

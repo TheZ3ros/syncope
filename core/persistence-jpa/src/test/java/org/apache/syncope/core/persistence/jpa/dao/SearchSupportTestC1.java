@@ -9,7 +9,7 @@ import org.apache.syncope.core.persistence.jpa.entity.group.JPAGroup;
 import org.apache.syncope.core.persistence.jpa.entity.user.JPAUser;
 import org.junit.jupiter.api.Test;
 
-class SearchSupportTest_C1 {
+class SearchSupportTestC1 {
 
     @Test
     void testTableForUser() {
