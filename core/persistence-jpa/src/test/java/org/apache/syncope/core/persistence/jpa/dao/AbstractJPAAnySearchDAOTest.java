@@ -215,4 +215,23 @@ public class AbstractJPAAnySearchDAOTest {
         AnySearchNode.Leaf leaf = (AnySearchNode.Leaf) result.get().node();
         assertEquals("mock_attr_cond", leaf.getClause());
     }
+
+    @Test
+    public void testTC7_Leaf_AuxClassCond() {
+        // CE7: LEAF, AuxClassCond
+        org.apache.syncope.core.persistence.api.dao.search.AuxClassCond auxCond = new org.apache.syncope.core.persistence.api.dao.search.AuxClassCond();
+        auxCond.setAuxClass("MyAuxClass");
+        SearchCond cond = SearchCond.of(auxCond);
+        List<Object> params = new ArrayList<>();
+        SearchSupport svs = new SearchViewSupport(AnyTypeKind.USER);
+
+        Optional<AbstractJPAAnySearchDAO.QueryInfo> result = dao.getQuery(cond, params, svs);
+
+        assertTrue(result.isPresent());
+        assertTrue(result.get().node() instanceof AnySearchNode.Leaf);
+        AnySearchNode.Leaf leaf = (AnySearchNode.Leaf) result.get().node();
+        assertTrue(leaf.getClause().contains("IN (SELECT any_id FROM"));
+        assertEquals(1, params.size());
+        assertEquals("MyAuxClass", params.get(0));
+    }
 }
