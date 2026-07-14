@@ -1,0 +1,2 @@
+org.apache.syncope.core.persistence.jpa.dao.AbstractJPAAnySearchDAO
+org.apache.syncope.core.persistence.jpa.dao.SearchSupport
