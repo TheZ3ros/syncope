@@ -95,7 +95,9 @@ public class DefaultMappingManagerTest {
         when(resource.getOrgUnit()).thenReturn(orgUnit);
         Item item = new Item();
         item.setIntAttrName("name");
+        item.setPurpose(org.apache.syncope.common.lib.types.MappingPurpose.PROPAGATION);
         when(orgUnit.getItems()).thenReturn(java.util.List.of(item));
+        when(orgUnit.getConnObjectKeyItem()).thenReturn(Optional.of(item));
 
         assertThrows(NullPointerException.class, () -> mappingManager.prepareAttrsFromRealm(null, resource));
     }

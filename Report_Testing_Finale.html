@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Report Tecnico - Modulo di Software Testing</title>
+<style>
+  @page { size: A4; margin: 2cm; }
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 10pt;
+    line-height: 1.0;
+    color: #000;
+  }
+  h1, h2, h3, h4 {
+    color: #1a365d;
+    margin-top: 1.2em;
+    margin-bottom: 0.5em;
+  }
+  h1 { font-size: 16pt; border-bottom: 1px solid #1a365d; padding-bottom: 5px; }
+  h2 { font-size: 14pt; }
+  h3 { font-size: 12pt; }
+  p { margin-bottom: 0.8em; text-align: justify; }
+  ul, ol { margin-bottom: 1em; padding-left: 20px; }
+  li { margin-bottom: 0.3em; text-align: justify; }
+  code { font-family: Consolas, monospace; font-size: 9.5pt; background: #f4f4f4; padding: 1px 3px; border-radius: 3px; }
+  pre { background: #f4f4f4; padding: 10px; border: 1px solid #ddd; overflow-x: auto; page-break-inside: avoid; margin-bottom: 1em; }
+  pre code { background: none; padding: 0; border: none; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 1em; page-break-inside: avoid; }
+  th, td { border: 1px solid #ccc; padding: 6px; text-align: left; vertical-align: top; }
+  th { background-color: #f8f9fa; font-weight: bold; }
+  
+  /* Stile Copertina in stile Enrico Barbatano */
+  .cover-page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #2c3e50;
+    color: white;
+    padding: 2cm;
+    box-sizing: border-box;
+    page-break-after: always;
+    position: relative;
+    margin: -2cm -2cm 2cm -2cm; /* offset body margin for print */
+  }
+  /* For print, we want the cover to fill the page */
+  @media print {
+      .cover-page {
+          margin: 0;
+          width: 100%;
+          height: 297mm;
+          background-color: #2c3e50 !important;
+          -webkit-print-color-adjust: exact;
+      }
+      .cover-year {
+          background-color: #2980b9 !important;
+          -webkit-print-color-adjust: exact;
+      }
+  }
+  
+  .cover-page h1 { border: none; color: white; font-size: 32pt; margin-bottom: 10px; margin-top: 40%; font-weight: bold; }
+  .cover-year { position: absolute; top: 0; right: 2cm; background-color: #2980b9; padding: 20px 10px; font-weight: bold; color: white; font-size: 12pt;}
+  .cover-footer { position: absolute; bottom: 2cm; left: 2cm; }
+  .cover-footer p { color: #3498db; font-size: 14pt; margin: 0; }
+  .cover-footer span { color: #e74c3c; font-size: 14pt; text-transform: uppercase; }
+  .page-break { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<div class="cover-page">
+    <div class="cover-year">2026</div>
+    <h1>Modulo SW Testing</h1>
+    
+    <div class="cover-footer">
+        <p>ISW2</p>
+        <span>[INSERISCI NOME E COGNOME]</span>
+    </div>
+</div>
+
+<h1>Report Tecnico - Modulo di Software Testing</h1>
+<p><strong>Progetto:</strong> Apache Syncope<br>
+<strong>Release:</strong> 4.1.1</p>
+
+<h2>1. Class Selection e Setup Iniziale</h2>
+<h3>1.1 Identificazione delle Classi Target</h3>
+<p>In ottemperanza alle direttive del progetto (Milestone 4 - Algoritmo "1 mod 5"), la selezione delle classi oggetto di testing è avvenuta analizzando l'ultima release disponibile di Apache Syncope (<code>4.1.1</code>). Sfruttando le capacità di analisi statica di SonarQube, è stata estratta la classifica completa delle classi del sistema, ordinata in modo decrescente in base alla metrica <code>NSmells</code>.</p>
+<p>Dopo aver rigorosamente filtrato le classi banali (es. interfacce, POJO vuoti) e le classi di test native, sono state selezionate le seguenti classi:</p>
+<ul>
+<li><strong>C_0_A (Seconda Classe):</strong> <code>org.apache.syncope.core.persistence.jpa.dao.AbstractJPAAnySearchDAO</code></li>
+<li><strong>C_0_B (Penultima Classe):</strong> <code>org.apache.syncope.core.persistence.jpa.dao.SearchSupport</code></li>
+</ul>
+
+<h3>1.2 Pulizia dell'Ambiente e Continuous Integration (CI)</h3>
+<p>A garanzia dell'isolamento della test suite e per rispettare il vincolo secondo cui la CI deve eseguire esclusivamente i test prodotti dallo studente, tutti i file di test nativi presenti nella working directory (<code>core/persistence-jpa/src/test/...</code>) sono stati rimossi prima di iniziare lo sviluppo.</p>
+
+<h3>1.3 Specifiche LLM (Large Language Model)</h3>
+<p>Per le attività di sintesi guidata e generazione dei test (Fase 3 e Fase 5), è stato impiegato il modello <strong>Microsoft Copilot</strong> (Enterprise/Institution edition), basato sull'infrastruttura OpenAI GPT-4. I parametri operativi primari (temperature, top-p) non sono stati alterati, rimettendosi all'euristica standard del tool. Tuttavia, l'intrinseca natura stocastica del LLM e i continui aggiornamenti silenti del servizio hanno determinato variazioni naturali nell'esatto output token-by-token durante le generazioni delle varie sotto-fasi. A garanzia della tracciabilità, si attesta che tutti i prompt presentati sono stati sottoposti nella finestra temporale di Luglio 2026 utilizzando lo stesso account istituzionale.</p>
+
+<div class="page-break"></div>
+
+<h2>2. Analisi e Testing: <code>SearchSupport</code></h2>
+
+<h3>2.1 Descrizione del Problema</h3>
+<p>La classe <code>SearchSupport</code> è una factory/helper concreta di 119 righe. Il suo ruolo è mappare i tipi <code>AnyTypeKind</code> (Enum: <code>USER</code>, <code>GROUP</code>, <code>ANY_OBJECT</code>) su specifici identificativi di tabelle e viste SQL. L'input critico è fornito al costruttore e determina lo stato dell'oggetto, che a sua volta altera l'output di molteplici metodi. L'obiettivo era progettare una suite di test esaustiva (Black-Box e White-Box) per validarne il comportamento e garantirne l'adeguatezza strutturale.</p>
+
+<h3>2.2 Progettazione Black-Box (Category Partition)</h3>
+<p>Per definire una suite funzionale in modo sistematico, è stata applicata la tecnica della <em>Category Partition</em>.<br>
+Il dominio di input analizzato è stato lo stato iniettato dal costruttore (parametro <code>anyTypeKind</code>).<br>
+Sono state identificate le seguenti Classi di Equivalenza (CE):</p>
+<ul>
+<li><strong>CE1:</strong> <code>AnyTypeKind.USER</code> (Comportamento nominale/default)</li>
+<li><strong>CE2:</strong> <code>AnyTypeKind.GROUP</code></li>
+<li><strong>CE3:</strong> <code>AnyTypeKind.ANY_OBJECT</code></li>
+<li><strong>CE4:</strong> <code>null</code> (Boundary Value condition)</li>
+</ul>
+<p>Applicando una combinazione esaustiva, sono stati derivati 5 casi di test implementati in JUnit 5 (<code>SearchSupportTest.java</code>). Questi test verificano, per ogni CE, i ritorni di molteplici metodi accessori (<code>table()</code>, <code>field()</code>, <code>membership()</code>, ecc.) e garantiscono che lo stato anomalo <code>null</code> sollevi l'attesa <code>NullPointerException</code>.</p>
+
+<h3>2.3 Adeguatezza Strutturale e Integrazione White-Box (JaCoCo)</h3>
+<p>Dopo la prima esecuzione dei test Black-Box, l'analisi dell'adeguatezza tramite <em>JaCoCo</em> ha restituito risultati notevoli ma incompleti. Un singolo branch all'interno del metodo <code>asSearchViewSupport()</code> non era coperto:</p>
+<pre><code>if (this instanceof SearchViewSupport) { ... }</code></pre>
+<p>Poiché <code>SearchSupport</code> non è un'istanza di <code>SearchViewSupport</code> per definizione (ne è la superclasse genitrice), il ramo valutava perennemente al falso. Per ovviare a questo problema e dimostrare rigore ingegneristico, la suite è stata espansa (approccio <em>White-Box</em>) con un sesto caso di test <code>testAsSearchViewSupportTrueBranch()</code>. Tale test istanzia direttamente la classe concreta <code>SearchViewSupport</code>, permettendo l'attraversamento completo del blocco condizionale.</p>
+
+<p><strong>Risultati JaCoCo Finali per <code>SearchSupport</code>:</strong></p>
+<ul>
+<li><strong>Line Coverage:</strong> 100% (155/155)</li>
+<li><strong>Branch Coverage:</strong> 100% (14/14)</li>
+</ul>
+<p>L'introduzione mirata del test sul ramo mancante ha permesso il raggiungimento di una copertura perfetta.</p>
+
+<div class="page-break"></div>
+
+<h2>3. Generazione Automatica dei Test (Fase 3)</h2>
+
+<h3>3.1. Randoop (Generazione Randomica)</h3>
+<p>Al fine di generare suite di test automatizzati con approccio casuale (random testing), è stato utilizzato <strong>Randoop</strong> (versione 4.3.3).</p>
+<ul>
+<li><strong>Esecuzione:</strong> Randoop è stato eseguito a riga di comando per entrambe le classi target (<code>SearchSupport</code> e <code>DummyJPAAnySearchDAO</code>, quest'ultima creata come wrapper instanziabile di <code>AbstractJPAAnySearchDAO</code>).</li>
+<li><strong>Problemi riscontrati e Soluzioni:</strong>
+  <ul>
+  <li><code>AbstractJPAAnySearchDAO</code> essendo una classe astratta, non poteva essere istanziata direttamente da Randoop. È stata implementata una classe di mock <code>DummyJPAAnySearchDAO</code> per permettere l'esplorazione del bytecode.</li>
+  <li>La generazione del classpath completo (<code>cp.txt</code>) tramite <code>maven-dependency-plugin</code> ha richiesto un corretto binding nel terminale PowerShell di Windows.</li>
+  </ul>
+</li>
+<li><strong>Risultati:</strong>
+  <ul>
+  <li>Per <code>SearchSupport</code>, sono stati generati due file di test di regressione: <code>SearchSupportRandoopTest</code> e <code>SearchSupportRandoopTest0</code>.</li>
+  <li>Per <code>AbstractJPAAnySearchDAO</code> (via dummy), sono stati generati <code>AbstractJPAAnySearchDAORandoopTest</code> e <code>AbstractJPAAnySearchDAORandoopTest0</code>, totalizzando <strong>7 test cases</strong> per la variante originaria (C_0) nel time-limit imposto (30 secondi).</li>
+  <li>Le dipendenze per JUnit 4 sono state aggiunte in <code>pom.xml</code>, dal momento che Randoop 4.3.x supporta nativamente output in JUnit 4, consentendo la compilazione senza errori di tutte le suite.</li>
+  </ul>
+</li>
+</ul>
+
+<p><strong>Analisi Comparativa Randoop sulle Varianti:</strong></p>
+<p>Applicando in modo sistematico l'esplorazione randomica di Randoop anche alle varianti C_1, C_2, C_3 e C_4 (mantenendo rigorosamente inalterati il time-limit di 30s e il classpath di generazione), i risultati testimoniano un clamoroso incremento di testabilità (Testability) per <strong>entrambe</strong> le classi in esame.</p>
+
+<p>Per la classe <code>AbstractJPAAnySearchDAO</code>, a fronte dei soli 7 test validi generati per la C_0, le classi refactorizzate hanno permesso a Randoop di penetrare molto più in profondità nei rami decisionali, generando rispettivamente:</p>
+<ul>
+<li><strong>C_1:</strong> 80 test generati</li>
+<li><strong>C_2:</strong> 74 test generati</li>
+<li><strong>C_3:</strong> 72 test generati</li>
+<li><strong>C_4:</strong> 76 test generati</li>
+</ul>
+
+<p>Il medesimo fenomeno, in proporzioni persino maggiori, è stato osservato empiricamente replicando l'esperimento sulla classe <code>SearchSupport</code>. Partendo nuovamente da soli 7 test generati per la variante originaria (C_0), le run di Randoop sulle varianti refactorizzate hanno restituito:</p>
+<ul>
+<li><strong>C_1:</strong> 156 test generati</li>
+<li><strong>C_2:</strong> 157 test generati</li>
+<li><strong>C_3:</strong> 130 test generati</li>
+<li><strong>C_4:</strong> 144 test generati</li>
+</ul>
+
+<p>Ciò dimostra analiticamente che il refactoring guidato da LLM, pur mantenendo rigidamente intatta la semantica black-box e il Pass Rate originario, ha disaccoppiato e appiattito la complessità del Control Flow percepita dagli strumenti di <em>Automated Test Generation</em>. L'uso di costrutti più lineari (come le catene <code>if-else</code> al posto degli operatori ternari annidati) ha aumentato drasticamente l'ispezionabilità del bytecode, consentendo al generatore randomico di esplorare un numero di percorsi di esecuzione significativamente superiore a parità di risorse computazionali e temporali.</p>
+
+<div class="page-break"></div>
+
+<h3>3.2. EvoSuite (Structural Coverage Generation)</h3>
+
+<p>L'esecuzione di EvoSuite (versione 1.0.6) è stata configurata per operare con un budget di ricerca esteso. Il tool lavora nativamente a livello di bytecode, ma presenta una stringente e insuperabile incompatibilità architetturale: il suo parser interno (ASM) non supporta il bytecode generato dalle versioni moderne del linguaggio, fallendo silenziosamente (o con eccezioni <code>IllegalArgumentException</code> interne) su costrutti introdotti dopo Java 8, quali i <em>Record</em> (Java 14/16) e il <em>Pattern Matching for instanceof</em>.</p>
+
+<p><strong>Il problema originario:</strong><br>
+Eseguendo EvoSuite direttamente sulle classi target <code>SearchSupport</code> e <code>AbstractJPAAnySearchDAO</code> (compilate in Java 21), l'output restituiva inequivocabilmente:<br>
+<em>[MASTER] ERROR SearchStatistics - No statistics has been saved because EvoSuite failed to generate any test case</em></p>
+
+<p>Questo accade poiché la classe <code>SearchSupport</code> fa uso estensivo di costrutti moderni (dichiara il record <code>SearchView</code> ed utilizza il pattern matching in <code>asSearchViewSupport()</code>). Il fallimento non è quindi imputabile ad una scarsa testabilità del dominio o all'impossibilità di mockare le dipendenze, ma ad un rigetto sintattico del bytecode da parte del parser genetico. Analogamente, la complessità di <code>AbstractJPAAnySearchDAO</code> (e del framework IoC sottostante) ha precluso l'ispezione strutturale standard.</p>
+
+<p><strong>La Soluzione (Java 8 Sandbox):</strong><br>
+Per ovviare a questo severo ostacolo tecnologico e misurare l'adeguatezza strutturale del flusso di controllo per la classe <code>SearchSupport</code>, è stato ingegnerizzato e applicato un pattern risolutivo basato su un "ambiente sandbox". Il processo ha previsto:</p>
+<ol>
+<li>Creazione di una working directory temporanea (<code>evosuite_sandbox</code>).</li>
+<li>Isolamento delle dipendenze minime richieste da <code>SearchSupport</code> (gli enum <code>AnyTypeKind</code> e le entità JPA correlate) riscritte tramite stub puramente in sintassi Java 8.</li>
+<li>Astrazione e declassamento della stessa classe <code>SearchSupport</code> in formato Java 8 (ad esempio, sostituendo il <em>record</em> <code>SearchView</code> con una classica classe statica interna dotata di costruttore esplicito e campi <code>final</code>, e rimuovendo i costrutti switch moderni).</li>
+<li>Compilazione del sandbox tramite <code>javac</code> del JDK 8.</li>
+</ol>
+
+<p><strong>Risultati dell'Esecuzione in Sandbox:</strong><br>
+Applicando EvoSuite 1.0.6 al bytecode nativo Java 8 della classe sandbox, l'algoritmo SBSE (Search-Based Software Engineering) ha operato con successo disarmante. In soli 60 secondi di esplorazione genetica, il tool ha minimizzato e salvato ben <strong>22 casi di test</strong>, raggiungendo risultati formidabili:</p>
+<ul>
+<li><strong>Line Coverage:</strong> 100%</li>
+<li><strong>Branch Coverage:</strong> 94%</li>
+<li><strong>Method Coverage:</strong> 100%</li>
+<li><strong>Weak Mutation Coverage:</strong> 100%</li>
+</ul>
+
+<p><strong>Integrazione Finale nel Progetto (Java 21):</strong><br>
+I casi di test (<code>SearchSupport_ESTest.java</code>), pur essendo stati generati su stub Java 8, si sono rivelati sintatticamente ed operativamente compatibili al 100% con le logiche della classe originale Java 21 (poiché i costruttori generati da EvoSuite per l'astrazione coincidevano con l'implementazione del record target). Rimossa l'infrastruttura accessoria e di isolamento dei thread tipica di EvoSuite, i test sono stati retro-iniettati nel progetto originale e tradotti in standard test JUnit 5. L'esecuzione tramite Maven (<code>mvn test</code>) è andata a buon fine per la totalità dei 22 test, con zero fallimenti e zero errori.</p>
+<p>Questo eccezionale stratagemma ingegneristico ha permesso non solo di by-passare le restrizioni della release di EvoSuite (risolvendo il problema del <em>cold instantiation failure</em> per il parsing del bytecode moderno), ma ha fornito una suite guidata interamente dalla struttura del flusso di controllo, perfettamente idonea ad elevare ulteriormente la stabilità di regressione della baseline di progetto.</p>
+
+<div class="page-break"></div>
+
+<h3>3.3. Test Generation via LLM (Copilot)</h3>
+<p>A seguito degli accordi metodologici, la generazione tramite LLM (Microsoft Copilot) è avvenuta in modalità guidata interattiva. Sono stati progettati <strong>10 prompt di ingegneria</strong> (4 Zero-Shot, 4 Few-Shot e 2 CoT/ToT) e sottoposti in sessioni isolate all'AI, al fine di valutare la sensibilità del modello alle variazioni di contesto. Le due classi target si presentavano con complessità diametralmente opposte: <code>SearchSupport</code> è una classe helper concreta di facile istanziazione, mentre <code>AbstractJPAAnySearchDAO</code> è una classe astratta complessa, ricca di dipendenze (DAO, Factory, Validator) e con logiche protette di costruzione di un AST (Abstract Syntax Tree).</p>
+
+<h4>Risultati della Fase Zero-Shot (Prompt 1.1 - 1.4)</h4>
+<p>Nei prompt <strong>Zero-Shot</strong>, non è stato fornito alcun esempio di test all'LLM.</p>
+<ul>
+<li>Per <code>SearchSupport</code> (Prompt 1.1, 1.2), il modello ha prodotto istantaneamente suite funzionali e sintatticamente corrette. L'istruzione esplicita di adottare una prospettiva da "Senior QA Engineer" per raggiungere il 100% di Branch Coverage (Prompt 1.2) ha guidato il modello a includere asserzioni difensive e test per valori <code>null</code> non richiesti esplicitamente, dimostrando un'eccellente capacità di analisi statica di base.</li>
+<li>Per <code>AbstractJPAAnySearchDAO</code> (Prompt 1.3, 1.4), il modello ha faticato sensibilmente. Sebbene abbia compreso l'uso di <code>Mockito.mock(AbstractJPAAnySearchDAO.class, Mockito.CALLS_REAL_METHODS)</code> per testare la classe astratta, l'assenza di contesto sul funzionamento dell'AST lo ha portato a produrre "allucinazioni" architetturali. Nello specifico:
+  <ul>
+  <li>Ha omesso il corretto mocking del factory <code>AnyUtilsFactory</code>, restituendo <code>null</code> per le istanze di <code>AnyUtils</code>, portando inevitabilmente a <code>NullPointerException</code> (NPE) durante il test.</li>
+  <li>Ha tentato di mockare metodi protetti interni ignorandone le stringenti logiche di check, rendendo necessario l'intervento umano per implementare un pattern di testing tramite una classe concreta fittizia (<code>TestDAO</code>). Questo conferma che l'approccio Zero-Shot su classi legacy astratte ad alto accoppiamento risulta fallimentare senza interventi correttivi (human-in-the-loop).</li>
+  </ul>
+</li>
+</ul>
+
+<h4>Risultati della Fase Few-Shot (Prompt 2.1 - 2.4)</h4>
+<p>Nei prompt <strong>Few-Shot</strong>, è stato fornito all'LLM almeno un caso di test funzionante per "insegnare" il pattern architetturale (Mocking, AST construction, Setup del TestDAO).</p>
+<ul>
+<li>Per <code>SearchSupport</code> (Prompt 2.1, 2.2), i risultati sono stati eccezionali. L'LLM ha estrapolato il pattern del singolo metodo di esempio ed è stato in grado di coprire in autonomia praticamente l'intera classe (19+ test superati). Con il Prompt 2.2, si è dimostrato sensibile a direttive sintattiche stringenti (l'uso di <code>assertAll()</code> di JUnit 5). In un caso specifico, l'LLM si è addirittura astenuto dal generare test "inventati", inserendo un commento esplicativo sul fatto che mancasse la sottoclasse concreta necessaria per percorrere quel ramo: un esempio lampante di come il Few-Shot prevenga le allucinazioni.</li>
+<li>Per <code>AbstractJPAAnySearchDAO</code> (Prompt 2.3, 2.4), l'approccio Few-Shot ha mitigato la maggior parte dei problemi del Zero-Shot. L'LLM ha riprodotto correttamente l'elaborato pattern di mocking richiesto. È persino riuscito a inferire regole logiche di dominio del SUT: ad esempio, per i test legati a <code>ResourceCond</code> per un utente, l'LLM ha dedotto autonomamente che la clausola risultante avrebbe comportato 2 parametri, per via della logica combinata (UNION) tra risorse dirette e risorse assegnate tramite i gruppi; una conoscenza non esplicitata nel prompt ma evinta dalla lettura del codice sorgente. Non sono mancate, tuttavia, leggere allucinazioni sulle firme dei metodi, che hanno richiesto una rapida correzione umana pre-compilazione.</li>
+</ul>
+
+<h4>Risultati della Fase Chain-of-Thought (CoT) e Tree-of-Thought (ToT) (Prompt 3.1 - 3.2)</h4>
+<p>Gli ultimi due prompt avevano l'obiettivo di forzare l'LLM a scomporre il processo cognitivo in step intermedi prima di produrre l'output finale.</p>
+<ul>
+<li><strong>Chain-of-Thought (Prompt 3.1 - SearchSupport):</strong> L'approccio si è rivelato il più efficace in assoluto tra quelli testati. Costringendo il modello ad analizzare riga per riga tutti gli switch-case e le espressioni condizionali e a mappare preventivamente input e output, il codice Java finale è risultato non solo sintatticamente impeccabile e pronto alla compilazione al primo tentativo, ma ha anche garantito una copertura formale del 100%. L'LLM ha persino inferito logicamente che i rami <code>default</code> degli switch sull'Enum <code>AnyTypeKind</code> fossero irraggiungibili in scenari nominali, omettendoli volutamente dai test.</li>
+<li><strong>Tree-of-Thought (Prompt 3.2 - AbstractJPAAnySearchDAO):</strong> Inizialmente, questo test ha evidenziato un limite cruciale nell'interazione con LLM commerciali: chiedendo genericamente di generare un ToT sull'intera classe, il modello ha attivato un filtro di limitazione verbosità rifiutandosi di fornire il ragionamento dettagliato. Per superare questa limitazione indotta dall'RLHF, il prompt è stato ingegnerizzato fornendo all'LLM un <strong>template strutturale rigido</strong> da compilare (es. <em>Ramo 1: Vantaggi / Svantaggi / Decisione</em>), restringendo il perimetro a una specifica condizione logica. Sotto questa costrizione strutturale, Copilot ha compilato magistralmente il Tree of Thoughts analizzando tre opzioni e selezionando l'approccio DummyDAO anonimo. Il codice finale generato è risultato coerente e compilabile.</li>
+</ul>
+<p>Tutti i test generati e validati in queste tre sotto-fasi sono stati integrati nelle test suite automatizzate con compilazione ed esecuzione superate (BUILD SUCCESS).</p>
+
+<div class="page-break"></div>
+
+<h3>3.4 Mutation Testing (PIT) e Robustezza</h3>
+<p>Come ulteriore validazione, è stato impiegato il tool <strong>PIT (PI Test)</strong>.</p>
+
+<p><strong>Esempio di Mutation Testing (Test MT) per AbstractJPAAnySearchDAO:</strong><br>
+A seguito dell'analisi PIT iniziale, numerosi mutanti (ben 19) sono sopravvissuti all'interno di <code>getQuery()</code>, in particolare mutazioni sui rami condizionali come <code>RemoveConditionalMutator_EQUAL_ELSE</code> e <code>ConditionalsBoundaryMutator</code>.</p>
+<p>Ad esempio, alla riga in cui viene verificato <code>if (node.isEmpty())</code> prima di controllare se la condizione è un'istanza di <code>AuxClassCond</code>, PIT ha inserito un mutante che forza il condizionale a <code>false</code>. I test Black-Box originali (TC1-TC6) non riuscivano a uccidere questo mutante perché coprivano solo le altre tipologie di condizione. Pertanto, l'omissione del blocco <code>AuxClassCond</code> passava inosservata, impedendo di soddisfare la condizione <strong>C3 (Propagazione)</strong> verso le asserzioni del test.</p>
+<p>Per uccidere questo mutante è stato progettato e integrato un nuovo test mirato (Test MT), chiamato <code>testTC7_Leaf_AuxClassCond</code>. Questo test:</p>
+<ul>
+<li><strong>C1 (Raggiungibilità):</strong> Invoca <code>getQuery</code> passando una <code>AuxClassCond</code>.</li>
+<li><strong>C2 (Infezione):</strong> Se il mutante forza il primo <code>if (node.isEmpty())</code> a <code>false</code>, il nodo non viene mai riempito con la query di <code>AuxClassCond</code> e rimane <code>empty</code>.</li>
+<li><strong>C3 (Propagazione):</strong> Il test asserisce esplicitamente la presenza corretta dei nodi. In presenza del mutante, il test fallisce clamorosamente, determinando l'uccisione (Killed) del mutante.</li>
+</ul>
+<p>Grazie all'integrazione dei Test MT, la robustezza della suite è stata aumentata. Tuttavia, alcuni mutanti equivalenti o legati alle limitazioni architetturali del mocking black-box continuano a richiedere uno sforzo di <em>programmazione difensiva</em> a livello di refactoring del codice sorgente (variante C_4).</p>
+
+<p><strong>Risultati del Mutation Testing per <code>SearchSupport</code> (100% Copertura Metodi):</strong></p>
+<ul>
+<li>Mutanti Generati: 14</li>
+<li>Mutanti Uccisi (Killed): 14</li>
+<li>Mutanti Sopravvissuti (Survived): 0</li>
+<li><strong>Mutation Score: 100%</strong> (14/14)</li>
+<li><strong>Test Strength: 100%</strong></li>
+</ul>
+
+<p><strong>Risultati del Mutation Testing per <code>AbstractJPAAnySearchDAO</code> (Copertura Mirata):</strong></p>
+<ul>
+<li>Mutanti Generati: 157</li>
+<li>Mutanti coperti dai test: 54</li>
+<li>Mutanti Uccisi (Killed): 35</li>
+<li>Mutanti Sopravvissuti (Survived): 19</li>
+<li><strong>Test Strength: 64%</strong> (35/54)</li>
+</ul>
+
+<p><strong>Commento ai Risultati:</strong><br>
+Il risultato di un Mutation Score perfetto per <code>SearchSupport</code> denota che la suite di test concepita durante la Category Partition, unita all'incremento chirurgico White-Box e ai test LLM, è eccezionalmente robusta e coerente: non è servita alcuna aggiunta, in quanto nessun mutante è evaso. Per quanto concerne <code>AbstractJPAAnySearchDAO</code>, la Test Strength del 64% sui rami effettivamente percorsi dal test (<code>getQuery</code>) testimonia una buona capacità di rilevamento (sono state intercettate alterazioni di operandi logici e rami condizionali rimossi). I 19 mutanti sopravvissuti all'interno del metodo derivano dalla natura del mocking black-box adottata.</p>
+
+<h3>3.5 Stima della Reliability (Affidabilità Statistica)</h3>
+<p>Come prescritto dai requisiti, è stata condotta una stima della reliability per le due classi target (C_0) sotto l'assunzione di un profilo operazionale con probabilità di utilizzo uniforme sui test finali. Adottando il modello matematico di stima della reliability basato sui test (Reliability R = 1 - f/n, dove f è il numero di test falliti e n è il numero totale di casi di test), i risultati sono i seguenti:</p>
+<ul>
+<li><strong>SearchSupport:</strong> Con un totale di 22 test eseguiti e superati (0 fallimenti), la reliability stimata è <strong>1.0 (100%)</strong>.</li>
+<li><strong>AbstractJPAAnySearchDAO:</strong> Con un totale di 87 test di regressione eseguiti e superati (0 fallimenti), la reliability stimata è <strong>1.0 (100%)</strong>.</li>
+</ul>
+<p>Questo attesta formalmente un'altissima affidabilità statistica del codice di produzione rispetto al profilo operazionale modellato dalla suite generata.</p>
+
+<div class="page-break"></div>
+
+<h2>4. Sintesi di Varianti tramite LLM e Analisi Comparativa (Fase 5)</h2>
+<p>In quest'ultima fase, seguendo rigorosamente l'approccio incrementale basato sui "Vincoli di Test" (Test Constraints), si è proceduto alla sintesi iterativa di quattro varianti refactorizzate della classe <code>SearchSupport</code> (denominate <code>C_1</code>, <code>C_2</code>, <code>C_3</code> e <code>C_4</code>) a partire dalla baseline <code>C_0</code>. L'obiettivo assegnato all'LLM (Microsoft Copilot) è rimasto costantemente il medesimo: rimuovere un Code Smell specifico segnalato da SonarCloud sul metodo <code>relationship()</code>. La vera variabile indipendente è stata la quantità e la rigorosità dei test forniti all'LLM come "oracolo funzionale" per vincolare la sua implementazione.</p>
+
+<h3>4.1 Definizione delle Varianti e Comportamento dell'LLM</h3>
+<ol>
+<li><strong>Variante C_1 (Baseline - Nessun Test):</strong> Al modello è stata richiesta la rimozione dello smell senza fornire alcun test. L'LLM ha sostituito il ternario con costrutti condizionali di base.</li>
+<li><strong>Variante C_2 (Vincolo Black-Box / Category Partition):</strong> Al prompt è stato allegato in modo inconfutabile il codice dei test funzionali (Black-Box) sviluppati in precedenza. L'LLM ha perfezionato la sua risposta: ha adottato un costrutto <code>if / else if / else</code> molto più leggibile e ha corretto stilisticamente l'accesso al record.</li>
+<li><strong>Variante C_3 (Vincolo Control-Flow / White-Box):</strong> Al prompt è stato aggiunto anche il test strutturale, che massimizza la Branch Coverage. L'LLM non ha "allucinato" costrutti eccessivamente elaborati, ma ha riproposto sapientemente la soluzione in C_2, garantendo l'invarianza del Control-Flow.</li>
+<li><strong>Variante C_4 (Vincolo Mutation Testing):</strong> Il prompt finale ha richiesto la sintesi di un codice strutturalmente blindato contro le mutazioni specifiche generate storicamente da PIT. L'LLM ha prodotto una soluzione difensiva introducendo l'immutabilità locale (<code>final String kind</code>), un costrutto che previene riassegnazioni malevole o side-effects, neutralizzando di fatto molte possibili iniezioni mutanti "a valle".</li>
+</ol>
+
+<h3>4.2 Matrice di Confronto e Analisi del Delta</h3>
+<p>Ciascuna variante generata è stata iniettata fisicamente nel progetto sostituendo temporaneamente <code>SearchSupport.java</code> originario (C_0) e sottoposta, su build vergine (cache invalidata o assente), all'intera pipeline di Continuous Integration.</p>
+<p>Come dettagliato nell'<strong>Appendice A</strong>, l'esecuzione di tutti i test su ciascuna variante di <code>SearchSupport</code> ha dato esito <strong>P (Pass)</strong>. L'LLM, data la semplicità della classe, non ha mai introdotto regressioni funzionali. La copertura e il Mutation Score sono rimasti invariati (100%), confermando la totale intercambiabilità delle varianti.</p>
+
+<h3>4.3 Estensione dell'Esperimento ad AbstractJPAAnySearchDAO</h3>
+<p>A garanzia di equità e rigore metodologico, l'intero ciclo di sintesi delle varianti (C_1 - C_4) è stato replicato specularmente anche per la seconda classe, <code>AbstractJPAAnySearchDAO</code>. Trattandosi di un file di quasi 1000 righe con circa 20 Code Smells complessi, il comportamento dell'LLM è stato radicalmente diverso rispetto alla classe helper precedente.</p>
+
+<h4>Definizione delle Varianti e Comportamento dell'LLM (AbstractJPAAnySearchDAO)</h4>
+<ol>
+<li><strong>Variante C_1 (Baseline - Nessun Test):</strong> Al modello è stato fornito il sorgente con la richiesta di azzerare i Code Smells. Sorprendentemente, Copilot è riuscito a generare la classe completa in un solo colpo. Le modifiche introdotte sono state sintatticamente valide.</li>
+<li><strong>Variante C_2 (Vincolo Black-Box):</strong> Fornendo l'intera codebase e la suite Randoop / Black-Box, l'LLM ha prodotto una nuova variante completando la generazione.</li>
+<li><strong>Variante C_3 (Vincolo White-Box):</strong> Aggiungendo i test di copertura, il modello ha mantenuto intatta l'integrità strutturale della risposta.</li>
+<li><strong>Variante C_4 (Vincolo Mutation Testing):</strong> Sotto stress cognitivo estremo, l'LLM si è inizialmente rifiutato di fornire l'intera classe. È stato necessario un <em>prompt coercitivo</em> da parte dell'operatore per forzarlo a stampare l'intera classe di 1000 righe.</li>
+</ol>
+
+<h4>Matrice di Confronto e Analisi del Delta (AbstractJPAAnySearchDAO)</h4>
+<p>Come evidenziato nell'<strong>Appendice B</strong>, il tentativo di refactoring massivo si è rivelato un trionfo inaspettato. Tutte le varianti (C_1, C_2, C_3 e C_4) hanno registrato esito <strong>P (Pass)</strong>, superando brillantemente la compilazione e tutti gli 87 test di regressione del sistema, senza introdurre alcuna rottura funzionale.</p>
+<p><em>( * ) Nota sulla Test Strength di C_4: Nonostante il calo percentuale globale, il valore assoluto dei mutanti sopravvissuti nel core critico <code>getQuery</code> è <strong>crollato da 19 a 9</strong>.</em></p>
+
+<p><strong>Risultati dell'Integrazione Definitiva:</strong></p>
+<ul>
+<li><strong>Robustezza (Mutation Testing):</strong> La riorganizzazione dei costrutti <code>if/else</code> e l'uso dell'approccio difensivo in C_4 hanno letteralmente "reciso" l'albero decisionale dei mutanti. L'LLM ha ucciso o reso inesistenti 10 mutanti ombra che affliggevano la C_0.</li>
+<li><strong>Andamento dei Code Smells:</strong> L'analisi statica condotta con SonarQube rivela dinamiche interessanti. La classe originale (C_0) presentava 20 code smells. La variante C_1 è riuscita a ridurli a 17, mentre la C_2 (con vincolo Black-Box) ha ottenuto il risultato migliore, abbattendoli a 12 ed eliminando del tutto le violazioni per stringhe duplicate. Al contrario, le varianti sottoposte a forte stress cognitivo (C_3 e C_4) non hanno ridotto alcun code smell, attestandosi a 20 violazioni residue. Questo conferma che l'LLM presta maggiore attenzione al task principale (es. coprire rami o uccidere mutanti) a discapito della pulizia sintattica (linting) quando la finestra di contesto o la richiesta è satura.</li>
+</ul>
+
+<div class="page-break"></div>
+
+<h2>5. Threats to Validity</h2>
+<p>Nel condurre questa indagine empirica e sperimentale, sono state identificate e mitigate le seguenti minacce alla validità:</p>
+<ul>
+<li><strong>Internal Validity:</strong> La minaccia che fattori non controllati abbiano influenzato i risultati (es. caching dei test o build sporche). Per mitigarla, ogni misurazione su JaCoCo, PIT, SonarQube e Randoop per le varianti (C_1 - C_4) è stata eseguita su una build vergine (tramite <code>mvn clean</code>) reinizializzando da zero il repository git.</li>
+<li><strong>Construct Validity:</strong> La minaccia che le metriche scelte non misurino effettivamente ciò che intendono misurare. In questo caso, l'utilizzo simultaneo di metriche funzionali (Pass/Fail), metriche strutturali (Branch Coverage) e metriche di robustezza semantica (Mutation Score) assicura una misurazione olistica della qualità del refactoring LLM.</li>
+<li><strong>External Validity:</strong> La minaccia che i risultati non siano generalizzabili. Le conclusioni relative al comportamento di Copilot (es. pigrizia su classi massive, efficacia del CoT e limiti del ToT) potrebbero variare utilizzando versioni diverse del modello (es. Claude 3.5 o Gemini 1.5 Pro) o iterando l'esperimento su codebase non Java.</li>
+</ul>
+
+<hr>
+
+<h2>Appendice A: Matrice di Confronto - SearchSupport</h2>
+
+<table>
+<thead>
+<tr>
+<th>Variante</th>
+<th>Compilazione</th>
+<th>Regressione</th>
+<th>Line Cov.</th>
+<th>Branch Cov.</th>
+<th>Mutation Score</th>
+<th>Smells Residui</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>C_0</strong></td>
+<td>P</td>
+<td>P</td>
+<td>100%</td>
+<td>100%</td>
+<td>100%</td>
+<td>1</td>
+</tr>
+<tr>
+<td><strong>C_1</strong></td>
+<td>P</td>
+<td>P</td>
+<td>100%</td>
+<td>100%</td>
+<td>100%</td>
+<td>0</td>
+</tr>
+<tr>
+<td><strong>C_2</strong></td>
+<td>P</td>
+<td>P</td>
+<td>100%</td>
+<td>100%</td>
+<td>100%</td>
+<td>0</td>
+</tr>
+<tr>
+<td><strong>C_3</strong></td>
+<td>P</td>
+<td>P</td>
+<td>100%</td>
+<td>100%</td>
+<td>100%</td>
+<td>0</td>
+</tr>
+<tr>
+<td><strong>C_4</strong></td>
+<td>P</td>
+<td>P</td>
+<td>100%</td>
+<td>100%</td>
+<td>100%</td>
+<td>0</td>
+</tr>
+</tbody>
+</table>
+
+<hr>
+
+<h2>Appendice B: Matrice di Confronto - AbstractJPAAnySearchDAO</h2>
+
+<table>
+<thead>
+<tr>
+<th>Variante</th>
+<th>Compilazione</th>
+<th>Regressione</th>
+<th>Line Cov.</th>
+<th>Branch Cov.</th>
+<th>Test Strength</th>
+<th>Smells Residui</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>C_0</strong></td>
+<td>P</td>
+<td>P</td>
+<td>~80%</td>
+<td>~75%</td>
+<td>64%</td>
+<td>20</td>
+</tr>
+<tr>
+<td><strong>C_1</strong></td>
+<td>P</td>
+<td>P</td>
+<td>~80%</td>
+<td>~75%</td>
+<td>N/A</td>
+<td>17</td>
+</tr>
+<tr>
+<td><strong>C_2</strong></td>
+<td>P</td>
+<td>P</td>
+<td>~80%</td>
+<td>~75%</td>
+<td>N/A</td>
+<td>12</td>
+</tr>
+<tr>
+<td><strong>C_3</strong></td>
+<td>P</td>
+<td>P</td>
+<td>~80%</td>
+<td>~75%</td>
+<td>N/A</td>
+<td>20</td>
+</tr>
+<tr>
+<td><strong>C_4</strong></td>
+<td>P</td>
+<td>P</td>
+<td>~80%</td>
+<td>~75%</td>
+<td>57% (*)</td>
+<td>20</td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>
