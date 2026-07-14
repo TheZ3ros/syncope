@@ -2052,6 +2052,10 @@ under the License.
         <artifactId>jacoco-maven-plugin</artifactId>
         <configuration>
           <skip>${skipTests}</skip>
+          <includes>
+            <include>org/apache/syncope/core/provisioning/java/DefaultMappingManager*</include>
+            <include>org/apache/syncope/core/provisioning/api/jexl/TemplateUtils*</include>
+          </includes>
         </configuration>
         <executions>
           <execution>

@@ -1,2 +1,2 @@
-org.apache.syncope.core.persistence.jpa.dao.AbstractJPAAnySearchDAO
-org.apache.syncope.core.persistence.jpa.dao.SearchSupport
+org.apache.syncope.core.provisioning.api.jexl.TemplateUtils
+org.apache.syncope.core.provisioning.java.DefaultMappingManager

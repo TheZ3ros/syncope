@@ -101,4 +101,47 @@ public class DefaultMappingManagerTest {
 
         assertThrows(NullPointerException.class, () -> mappingManager.prepareAttrsFromRealm(null, resource));
     }
+
+    @Test
+    public void testTC4_PrepareAttr_Realm() throws Exception {
+        ExternalResource resource = mock(ExternalResource.class);
+        Item item = new Item();
+        item.setIntAttrName("name");
+        item.setExtAttrName("extName");
+        Realm realm = mock(Realm.class);
+        when(realm.getName()).thenReturn("myRealm");
+
+        org.apache.syncope.core.provisioning.api.IntAttrName intAttrName = mock(org.apache.syncope.core.provisioning.api.IntAttrName.class);
+        when(intAttrNameParser.parse("name")).thenReturn(intAttrName);
+        when(intAttrName.getField()).thenReturn("name");
+        when(intAttrName.getSchemaInfo()).thenReturn(null);
+
+        org.apache.syncope.core.provisioning.api.MappingManager.PreparedAttr attr = mappingManager.prepareAttr(resource, item, realm);
+
+        assertNotNull(attr);
+        assertNotNull(attr.attribute());
+        assertEquals("extName", attr.attribute().getName());
+        assertEquals("myRealm", attr.attribute().getValue().get(0).toString());
+    }
+
+    @Test
+    public void testTC5_PrepareAttr_Realm_EmptyValues() throws Exception {
+        ExternalResource resource = mock(ExternalResource.class);
+        Item item = new Item();
+        item.setIntAttrName("invalid");
+        item.setExtAttrName("extName");
+        Realm realm = mock(Realm.class);
+
+        org.apache.syncope.core.provisioning.api.IntAttrName intAttrName = mock(org.apache.syncope.core.provisioning.api.IntAttrName.class);
+        when(intAttrNameParser.parse("invalid")).thenReturn(intAttrName);
+        when(intAttrName.getField()).thenReturn("invalid");
+        when(intAttrName.getSchemaInfo()).thenReturn(null);
+
+        org.apache.syncope.core.provisioning.api.MappingManager.PreparedAttr attr = mappingManager.prepareAttr(resource, item, realm);
+
+        assertNotNull(attr);
+        assertNotNull(attr.attribute());
+        assertEquals("extName", attr.attribute().getName());
+        assertTrue(attr.attribute().getValue() == null || attr.attribute().getValue().isEmpty());
+    }
 }
